@@ -82,6 +82,11 @@ int main(int argc, char **argv)
     if (n < 0)
         error("Ошибка recvfrom.");
 
-    printf("Получен ответ сервера: %s", buf);
+    /* atol() - преображует строку в длинное целок число */
+    time_t tt = atol(buf);
+    /* localtime() - преобразует время в секундах в структуру struct tm - локальное время-дата */
+    struct tm *local_tm = localtime(&tt);
+    printf("Получено время сервера: %4d-%02d-%02d %02d:%02d:%02d\n", local_tm->tm_year + 1900, local_tm->tm_mon + 1, local_tm->tm_mday, local_tm->tm_hour, local_tm->tm_min, local_tm->tm_sec);
+
     return 0;
 }

@@ -62,19 +62,31 @@ int main(int argc, char **argv)
     /* bzero() - заполняет нулями содержимое структуры serveraddr */
     bzero((char *) &serveraddr, sizeof(serveraddr));
     serveraddr.sin_family = AF_INET;
+    /* htonl() - преобразует длинное беззнаковое целое INADDR_ANY (константу) в сетевой порядок следования байтов TCP/IP,
+          в котором числа оканчиваются старшим байтом. */
     serveraddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    /* htonl() - преобразует беззнаковое короткое (short) целое portno в сетевой порядок следования байтов TCP/IP */
     serveraddr.sin_port = htons((unsigned short)portno);
 
     if (bind(sockfd, (struct sockaddr *) &serveraddr, sizeof(serveraddr)) < 0)
         error("Ошика bind");
 
+    /* получаем азмер структуры clientaddr */
     clientlen = sizeof(clientaddr);
 
     while (1) {
+        /* bzero() - заполняет нулями содержимое массива buf */
         bzero(buf, BUFSIZE);
-        /* recvfrom() - получает сообщение из сокета sockfd, данные записываются по адресу buff, размером строки buf,
+        /* recvfrom() - получает сообщение из сокета sockfd (от клиента), данные записываются по адресу buff, размером BUFSIZE,
                     в структуру cliendaddr возвращается адрес клиента, который далее можно использовать для обмена.  */
         n_bytes = recvfrom(sockfd, buf, BUFSIZE, 0, (struct sockaddr *)&clientaddr, &clientlen);
+
+        /* atol() - преображует строку в длинное целок число */
+        time_t tt = atol(buf);
+        /* localtime() - преобразует время в секундах в структуру struct tm - локальное время-дата */
+        struct tm *local_tm = localtime(&tt);
+        printf("Получено время клиента: %4d-%02d-%02d %02d:%02d:%02d\n", local_tm->tm_year + 1900, local_tm->tm_mon + 1, local_tm->tm_mday, local_tm->tm_hour, local_tm->tm_min, local_tm->tm_sec);
+
         /* time() - возвращает текущее время в секундах, начиная с 1970-01-01 00:00:00 +0000 (UTC);  UNIX time. */
         current_time = time(NULL);
 
